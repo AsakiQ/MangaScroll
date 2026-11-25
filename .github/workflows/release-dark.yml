@@ -20,7 +20,7 @@ jobs:
           set -euo pipefail
           repo="$GITHUB_REPOSITORY"
           tag="v1.0.0"
-          gh api -H 'Accept: application/vnd.github.raw+json' "repos/$repo/contents/dist/MangaScroll-Dark.exe?ref=$GITHUB_SHA" > MangaScroll-Dark.exe
+          curl -fsSL "https://raw.githubusercontent.com/$repo/$GITHUB_SHA/dist/MangaScroll-Dark.exe" -o MangaScroll-Dark.exe
           echo '466fe55034d826bf228c2d3b30689f5ebeddfc1ddcedbbf33385ed9f03f7509f  MangaScroll-Dark.exe' | sha256sum --check
           if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then exit 0; fi
           cat > notes.md <<'NOTES'
