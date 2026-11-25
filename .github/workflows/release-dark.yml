@@ -1,0 +1,33 @@
+name: Publish MangaScroll Dark
+on:
+  push:
+    paths:
+      - .github/workflows/release-dark.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Verify and publish the Windows build
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+          tag="v1.0.0"
+          gh api -H 'Accept: application/vnd.github.raw+json' "repos/$repo/contents/dist/MangaScroll-Dark.exe?ref=$GITHUB_SHA" > MangaScroll-Dark.exe
+          echo '466fe55034d826bf228c2d3b30689f5ebeddfc1ddcedbbf33385ed9f03f7509f  MangaScroll-Dark.exe' | sha256sum --check
+          if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then exit 0; fi
+          cat > notes.md <<'NOTES'
+          Тёмный интерфейс MangaScroll для Windows x64. У каждого окна Chrome свой темп прокрутки, текст комментария и управление чтением.
+
+          Скачайте **MangaScroll-Dark.exe** из раздела Assets. Закройте предыдущую версию, откройте главу ReManga в отдельном окне Chrome и нажмите **Обновить → Добавить окно → ▶**.
+
+          SHA-256: `466fe55034d826bf228c2d3b30689f5ebeddfc1ddcedbbf33385ed9f03f7509f`
+          NOTES
+          gh release create "$tag" MangaScroll-Dark.exe --repo "$repo" --target "$GITHUB_SHA" --title "MangaScroll Dark · Windows x64" --notes-file notes.md
